@@ -13,24 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout repository
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Setup Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # Backend install & test
-     # - name: Backend install & test
-       # run: |
-        #  todo-app-backend
-         # npm ci
-          #npm test
+      - name: Backend install & test
+        run: |
+          npm ci
+          npm test
 
-      # Docker Hub login
       - name: Docker Hub login
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -38,9 +33,7 @@ jobs:
         run: |
           echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 
-      # Build & push backend image
       - name: Build & push backend image
         run: |
-          cd todo-app-backend
           docker build -t ariana1/todo-backend:latest .
           docker push ariana1/todo-backend:latest
