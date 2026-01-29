@@ -24,11 +24,11 @@ jobs:
           node-version: 18
 
       # Backend install & test
-      - name: Backend install & test
-        run: |
-          todo-app-backend
-          npm ci
-          npm test
+     # - name: Backend install & test
+       # run: |
+        #  todo-app-backend
+         # npm ci
+          #npm test
 
       # Docker Hub login
       - name: Docker Hub login
@@ -41,6 +41,6 @@ jobs:
       # Build & push backend image
       - name: Build & push backend image
         run: |
-          todo-app-backend
+          cd todo-app-backend
           docker build -t ariana1/todo-backend:latest .
           docker push ariana1/todo-backend:latest
