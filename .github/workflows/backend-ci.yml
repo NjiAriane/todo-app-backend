@@ -26,7 +26,7 @@ jobs:
       # Backend install & test
       - name: Backend install & test
         run: |
-          cd todo-app-backend
+          todo-app-backend
           npm ci
           npm test
 
