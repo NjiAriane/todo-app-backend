@@ -41,6 +41,6 @@ jobs:
       # Build & push backend image
       - name: Build & push backend image
         run: |
-          cd todo-app-backend
+          todo-app-backend
           docker build -t ariana1/todo-backend:latest .
           docker push ariana1/todo-backend:latest
