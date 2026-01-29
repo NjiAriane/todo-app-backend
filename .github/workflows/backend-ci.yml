@@ -35,7 +35,7 @@ jobs:
       - name: Build & push backend image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker build -t ariana1/todo-backend:$IMAGE_TAG ./todo-app-backend
+          docker build -t ariana1/todo-backend:$IMAGE_TAG .todo-app-backend
           docker push ariana1/todo-backend:$IMAGE_TAG
 
       # Set up kubectl
