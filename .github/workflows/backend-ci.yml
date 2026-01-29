@@ -1,4 +1,4 @@
-name: CI - Backend Build, Test, Push (Dev Branch)
+name: CI/CD - Backend Build, Test, Deploy (Dev Branch)
 
 on:
   push:
@@ -9,18 +9,21 @@ on:
       - main
 
 jobs:
-  build-and-push-backend:
-    runs-on: ubuntu-latest
+  build-test-deploy-backend:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout repository
+      # Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
+      # Login to Docker Hub
       - name: Docker Hub login
         env:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -28,7 +31,39 @@ jobs:
         run: |
           echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 
+      # Build & push Docker image (commit SHA tag)
       - name: Build & push backend image
         run: |
-          docker build -t ariana1/todo-backend:latest .
-          docker push ariana1/todo-backend:latest
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t ariana1/todo-backend:$IMAGE_TAG ./todo-app-backend
+          docker push ariana1/todo-backend:$IMAGE_TAG
+
+      # Set up kubectl
+      - name: Set up Kubernetes
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      # Write KUBECONFIG secret to file
+      - name: Prepare Kubeconfig
+        run: |
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/kubeconfig.yaml
+          export KUBECONFIG=$HOME/kubeconfig.yaml
+          kubectl config view
+
+      # Deploy to Kubernetes using the new image
+      - name: Deploy to Kubernetes
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          export KUBECONFIG=$HOME/kubeconfig.yaml
+          kubectl set image deployment/todo-backend todo-backend=ariana1/todo-backend:$IMAGE_TAG -n workload
+          kubectl rollout status deployment/todo-backend -n workload
+
+      # Verify backend deployment
+      - name: Verify backend
+        run: |
+          export KUBECONFIG=$HOME/kubeconfig.yaml
+          echo "Backend pods:"
+          kubectl get pods -n workload -l app=todo-backend
+          echo "Backend service info:"
+          kubectl get svc -n workload todo-backend-service
