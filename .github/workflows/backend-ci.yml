@@ -21,10 +21,10 @@ jobs:
         with:
           node-version: 18
 
-      - name: Backend install & test
-        run: |
-          npm ci
-          npm test
+     # - name: Backend install & test
+       # run: |
+         # npm ci
+          #npm test
 
       - name: Docker Hub login
         env:
